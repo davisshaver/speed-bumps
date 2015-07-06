@@ -132,7 +132,7 @@ class Speed_Bumps {
 		return implode( PHP_EOL . PHP_EOL, $output );
 	}
 
-	public function register_speed_bump( $id, $args = array() ) {
+	public function register_speed_bump( $id, $args = array(), $priority = 10 ) {
 		$id = sanitize_key( $id );
 		$default = array(
 			'id' => $id,
@@ -147,7 +147,18 @@ class Speed_Bumps {
 			'minimum_space_from_other_inserts' => 1,
 			);
 		$args = wp_parse_args( $args, $default );
+		$args['priority'] = $priority;
+
 		self::$speed_bumps[ $id ] = $args;
+
+		uasort( self::$speed_bumps,
+			function( $a, $b ) {
+				if ( $a['priority'] == $b['priority'] ) {
+					return 0;
+				}
+				return $a['priority'] < $b['priority'] ? -1 : 1;
+			}
+		);
 
 		$filter_id = sprintf( self::$filter_id, $id );
 
@@ -159,6 +170,7 @@ class Speed_Bumps {
 		add_filter( $filter_id, '\Speed_Bumps\Constraints\Content\Injection::minimum_space_from_other_inserts_paragraphs', 10, 4 );
 		add_filter( $filter_id, '\Speed_Bumps\Constraints\Content\Injection::minimum_space_from_other_inserts_words', 10, 4 );
 		add_filter( $filter_id, '\Speed_Bumps\Constraints\Elements\Element_Constraints::adj_paragraph_not_contains_element', 10, 4 );
+
 	}
 
 	public function get_speed_bumps() {

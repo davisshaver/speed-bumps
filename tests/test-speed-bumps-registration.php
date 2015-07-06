@@ -20,6 +20,14 @@ class Test_Speed_Bumps_Registration extends WP_UnitTestCase {
 		$this->assertTrue( $filter_exists );
 	}
 
+	public function test_registration_priority() {
+		$this->speed_bumps->clear_all_speed_bumps();
+		$this->speed_bumps->register_speed_bump( 'id10' );
+		$this->speed_bumps->register_speed_bump( 'id5', null, 5 );
+		$this->speed_bumps->register_speed_bump( 'id100', null, 100 );
+		$this->assertEquals( array( 'id5', 'id10', 'id100' ), array_keys( Speed_Bumps()->get_speed_bumps() ) );
+	}
+
 	public function test_speed_bump_registration_default_arguments() {
 		$this->speed_bumps->register_speed_bump( 'speed_bump1' );
 		$speed_bump1_args = $this->speed_bumps->get_speed_bump( 'speed_bump1' );
