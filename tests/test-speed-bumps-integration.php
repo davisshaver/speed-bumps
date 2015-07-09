@@ -349,5 +349,50 @@ EOT;
 		$this->assertEquals( $expected_content, $new_content );
 	}
 
+	public function test_speedbump_with_callback_context() {
+		\Speed_Bumps()->clear_all_speed_bumps();
+		$content = <<<EOT
+This is the first paragraph
+
+This is the second paragraph
+EOT;
+
+		$expected_content = <<<EOT
+This is the first paragraph
+
+This is the second paragraph
+
+<div data-id="paragraph1">test1</div>
+EOT;
+
+		\Speed_Bumps()->register_speed_bump( 'speed_bump1', array(
+			'string_to_inject' => function($context) { 
+				return '<div data-id="paragraph'.$context['index'].'">test1</div>'; 
+			},
+			'minimum_content_length' => 1,
+			'paragraph_offset' => 1,
+		) );
+		$new_content = Speed_Bumps()->insert_speed_bumps( $content );
+
+		$this->assertEquals( $expected_content, $new_content );
+	}
+
+	public function test_speedbump_not_insert() {
+		\Speed_Bumps()->clear_all_speed_bumps();
+		$content = <<<EOT
+This is the first paragraph
+EOT;
+		\Speed_Bumps()->register_speed_bump( 'speed_bump1', array(
+			'string_to_inject' => function($context) { 
+				return '<div data-id="paragraph'.$context['index'].'">test1</div>'; 
+			},
+			'minimum_content_length' => 1000,
+			'paragraph_offset' => 1,
+		) );
+
+		$new_content = Speed_Bumps()->insert_speed_bumps( $content );
+
+		$this->assertEquals( $content, $new_content );
+	}
 }
 
