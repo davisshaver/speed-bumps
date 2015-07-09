@@ -366,8 +366,8 @@ This is the second paragraph
 EOT;
 
 		\Speed_Bumps()->register_speed_bump( 'speed_bump1', array(
-			'string_to_inject' => function($context) { 
-				return '<div data-id="paragraph'.$context['index'].'">test1</div>'; 
+			'string_to_inject' => function($context) {
+				return '<div data-id="paragraph'.$context['index'].'">test1</div>';
 			},
 			'minimum_content_length' => 1,
 			'paragraph_offset' => 1,
@@ -383,8 +383,8 @@ EOT;
 This is the first paragraph
 EOT;
 		\Speed_Bumps()->register_speed_bump( 'speed_bump1', array(
-			'string_to_inject' => function($context) { 
-				return '<div data-id="paragraph'.$context['index'].'">test1</div>'; 
+			'string_to_inject' => function($context) {
+				return '<div data-id="paragraph'.$context['index'].'">test1</div>';
 			},
 			'minimum_content_length' => 1000,
 			'paragraph_offset' => 1,
