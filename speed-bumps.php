@@ -16,6 +16,7 @@ class Speed_Bumps {
 
 	private static $instance;
 	private static $speed_bumps = array();
+	private static $counter = 0;
 
 	private static $filter_id = 'speed_bumps_%s_constraints';
 
@@ -204,7 +205,7 @@ class Speed_Bumps {
 		$args = wp_parse_args( $args, $defaults );
 
 		$args['id'] = $id;
-		$args['priority'] = $priority;
+		$args['priority'] = $priority + ( self::$counter++ / 100000 );
 
 		self::$speed_bumps[ $id ] = $args;
 
