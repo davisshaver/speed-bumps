@@ -164,6 +164,49 @@ class Test_Speed_Bumps_Integration extends WP_UnitTestCase {
 
 	}
 
+	public function test_speed_bump_priority_argument() {
+		$content = $this->get_dummy_content();
+
+		\Speed_Bumps()->register_speed_bump( 'speed_bump1', array(
+			'string_to_inject' => function() { return 'test1'; },
+			'minimum_content_length' => 1,
+			'from_start' => array( 'paragraphs' => 2, ),
+			'from_speedbump' => array( 'paragraphs' => 2 ),
+			'from_end' => false,
+			'from_element' => false,
+		) );
+
+		\Speed_Bumps()->register_speed_bump( 'speed_bump2', array(
+			'string_to_inject' => function() { return 'test2'; },
+			'minimum_content_length' => 1,
+			'from_start' => array( 'paragraphs' => 2, ),
+			'from_speedbump' => array( 'paragraphs' => 2 ),
+			'from_end' => false,
+			'from_element' => false,
+		) );
+
+		$new_content = Speed_Bumps()->insert_speed_bumps( $content );
+
+		$this->assertSpeedBumpAtParagraph( $new_content, 4, 'test1' );
+		$this->assertSpeedBumpAtParagraph( $new_content, 7, 'test2' );
+
+		Speed_Bumps()->clear_speed_bump( 'speed_bump2' );
+
+		\Speed_Bumps()->register_speed_bump( 'speed_bump2', array(
+			'string_to_inject' => function() { return 'test2'; },
+			'minimum_content_length' => 1,
+			'from_start' => array( 'paragraphs' => 2, ),
+			'from_speedbump' => array( 'paragraphs' => 2 ),
+			'from_end' => false,
+			'from_element' => false,
+		), 5 );
+
+		$new_content = Speed_Bumps()->insert_speed_bumps( $content );
+
+		$this->assertSpeedBumpAtParagraph( $new_content, 7, 'test1' );
+		$this->assertSpeedBumpAtParagraph( $new_content, 4, 'test2' );
+	}
+
 	private function get_dummy_content() {
 		$content = <<<EOT
 Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.
