@@ -3,11 +3,40 @@ namespace Speed_Bumps\Utils;
 
 class Text {
 
+	private static $_cache = array();
+
+	private static function _cache_check( $function, $key ) {
+		if ( ! array_key_exists( $function, static::$_cache ) ) {
+			static::$_cache[ $function ] = array();
+			return false;
+		}
+
+		if ( array_key_exists( $key, static::$_cache[ $function ] ) ) {
+			return static::$_cache[ $function ][ $key ];
+		}
+
+		return false;
+	}
+
+	private static function _cache_set( $function, $key, $value ) {
+		static::$_cache[ $function ][ $key ] = $value;
+
+		//error_log( print_r( static::$_cache, true ) );
+	}
+
 	public static function split_paragraphs( $content ) {
 		if ( is_array( $content ) ) {
 			$content = implode( "\n\n", $content );
 		}
-		return array_filter( preg_split( '/\n\s*\n/', $content ) );
+
+		$cache_key = hash( 'md4', $content );
+		$result = static::_cache_check( 'split_paragraphs', $cache_key );
+		if ( false === $result ) {
+			$result = array_filter( preg_split( '/\n\s*\n/', $content ) );
+			static::_cache_set( 'split_paragraphs', $cache_key, $result );
+		}
+
+		return $result;
 	}
 
 
@@ -15,7 +44,13 @@ class Text {
 		if ( is_array( $content ) ) {
 			$content = implode( ' ', $content );
 		}
-		return array_filter( explode( ' ', strip_tags( $content ) ) );
+
+		$cache_key = hash( 'md4', $content );
+		$result = static::_cache_check( 'split_words', $cache_key );
+		if ( false === $result ) {
+			$result = array_filter( explode( ' ', strip_tags( $content ) ) );
+			static::_cache_set( 'split_words', $cache_key, $result );
+		}
 	}
 
 
@@ -62,23 +97,32 @@ class Text {
 			return self::content_between_points( $parts, $index + 1 - $measure, $index + 1 + $measure );
 		}
 
-		$paragraphs = array();
+		$cache_key = hash( 'md4', var_export( $parts, true ) ) . $index . $unit . $measure;
 
-		$p = $index; $count_backward = 0;
-		while ( $count_backward < $measure && $p >= 0 ) {
-			array_unshift( $paragraphs, $parts[ $p ] );
-			$count_backward += self::count_units( $parts[ $p ], $unit );
-			$p--;
+		$result = static::_cache_check( 'content_within_distance_of', $cache_key );
+
+		if ( false === $result ) {
+			$paragraphs = array();
+
+			$p = $index; $count_backward = 0;
+			while ( $count_backward < $measure && $p >= 0 ) {
+				array_unshift( $paragraphs, $parts[ $p ] );
+				$count_backward += self::count_units( $parts[ $p ], $unit );
+				$p--;
+			}
+
+			$p = $index; $count_forward = 0;
+			while ( $count_forward <= $measure && $p < count( $parts ) - 1 ) {
+				$p++;
+				array_push( $paragraphs, $parts[ $p ] );
+				$count_forward += self::count_units( $parts[ $p ], $unit );
+			}
+
+			$result = $paragraphs;
+			static::_cache_set( 'content_within_distance_of', $cache_key, $result );
 		}
 
-		$p = $index; $count_forward = 0;
-		while ( $count_forward <= $measure && $p < count( $parts ) - 1 ) {
-			$p++;
-			array_push( $paragraphs, $parts[ $p ] );
-			$count_forward += self::count_units( $parts[ $p ], $unit );
-		}
-
-		return $paragraphs;
+		return $result;
 	}
 
 	public static function count_units( $text, $unit ) {
