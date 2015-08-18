@@ -20,8 +20,6 @@ class Text {
 
 	private static function _cache_set( $function, $key, $value ) {
 		static::$_cache[ $function ][ $key ] = $value;
-
-		//error_log( print_r( static::$_cache, true ) );
 	}
 
 	public static function split_paragraphs( $content ) {
@@ -51,6 +49,8 @@ class Text {
 			$result = array_filter( explode( ' ', strip_tags( $content ) ) );
 			static::_cache_set( 'split_words', $cache_key, $result );
 		}
+
+		return $result;
 	}
 
 
@@ -97,9 +97,13 @@ class Text {
 			return self::content_between_points( $parts, $index + 1 - $measure, $index + 1 + $measure );
 		}
 
-		$cache_key = hash( 'md4', var_export( $parts, true ) ) . $index . $unit . $measure;
+		$cache_key_array = $parts;
+		$cache_key_array['index'] = $index;
+		$cache_key_array['measure'] = $measure;
 
-		$result = static::_cache_check( 'content_within_distance_of', $cache_key );
+		$cache_key = hash( 'md4', var_export( $cache_key_array, true ) );
+
+		$result = static::_cache_check( 'content_within_' . $unit . 's_of', $cache_key );
 
 		if ( false === $result ) {
 			$paragraphs = array();
@@ -119,7 +123,7 @@ class Text {
 			}
 
 			$result = $paragraphs;
-			static::_cache_set( 'content_within_distance_of', $cache_key, $result );
+			static::_cache_set( 'content_within_' . $unit . 's_of', $cache_key, $result );
 		}
 
 		return $result;
