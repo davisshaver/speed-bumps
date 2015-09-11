@@ -108,6 +108,27 @@ class Speed_Bumps {
 	 * @return string The text with all registered speed bumps inserted at appropriate locations if possible.
 	 */
 	public function insert_speed_bumps( $the_content ) {
+
+		/*
+		 * Content to be used in generating a cache key for Speed Bumps object caching.
+		 *
+		 * Contains the content string and the array of currently registered
+		 * speed bumps. Append additional identifying content to this string if
+		 * your speed bumps vary based on additional factors (post meta fields,
+		 * for example). Return false to disable caching of results altogether.
+		 *
+		 * @param string Cache key content value, which is hashed to generate a
+		 * cache key.
+		 */
+		$speed_bumps_cache_key_content = apply_filters( 'speed_bumps_cache_key_content', $the_content . var_export( $this->get_speed_bumps(), true ) );
+
+		if ( $speed_bumps_cache_key_content ) {
+			$cache_key = hash( 'md5', $speed_bumps_cache_key_content );
+			if ( $cached_result = wp_cache_get( $cache_key, 'speed_bumps' ) ) {
+				return $cached_result;
+			}
+		}
+
 		$output = array();
 		$already_inserted = array();
 		$parts = Text::split_paragraphs( $the_content );
@@ -139,7 +160,13 @@ class Speed_Bumps {
 			}
 		}
 
-		return implode( PHP_EOL . PHP_EOL, $output );
+		$result = implode( PHP_EOL . PHP_EOL, $output );
+
+		if ( $speed_bumps_cache_key_content ) {
+			wp_cache_set( $cache_key, $result, 'speed_bumps' );
+		}
+
+		return $result;
 	}
 
 	/**
