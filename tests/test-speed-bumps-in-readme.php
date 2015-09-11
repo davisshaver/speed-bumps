@@ -5,6 +5,7 @@ class Test_Speed_Bumps_In_Readme extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		add_filter( 'the_content', 'insert_speed_bumps', 1 );
+		Speed_Bumps()->clear_all_speed_bumps();
 	}
 
 	public function test_speed_bump_filter_usage() {

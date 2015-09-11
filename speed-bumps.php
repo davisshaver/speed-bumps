@@ -17,6 +17,8 @@ class Speed_Bumps {
 	private static $instance;
 	private static $speed_bumps = array();
 
+	private static $cache_results = array();
+
 	private static $filter_id = 'speed_bumps_%s_constraints';
 
 	/**
@@ -124,8 +126,8 @@ class Speed_Bumps {
 
 		if ( $speed_bumps_cache_key_content ) {
 			$cache_key = hash( 'md5', $speed_bumps_cache_key_content );
-			if ( $cached_result = wp_cache_get( $cache_key, 'speed_bumps' ) ) {
-				return $cached_result;
+			if ( array_key_exists( $cache_key, self::$cache_results ) ) {
+				return self::$cache_results[ $cache_key ];
 			}
 		}
 
@@ -162,8 +164,8 @@ class Speed_Bumps {
 
 		$result = implode( PHP_EOL . PHP_EOL, $output );
 
-		if ( $speed_bumps_cache_key_content ) {
-			wp_cache_set( $cache_key, $result, 'speed_bumps' );
+		if ( $speed_bumps_cache_key_content && ! empty( $cache_key ) ) {
+			self::$cache_results[ $cache_key ] = $result;
 		}
 
 		return $result;
@@ -272,6 +274,8 @@ class Speed_Bumps {
 		foreach ( $this->get_speed_bumps() as $id => $args ) {
 			$this->clear_speed_bump( $id );
 		}
+
+		self::$cache_results = array();
 	}
 }
 

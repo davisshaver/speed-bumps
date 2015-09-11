@@ -5,6 +5,31 @@ class Test_Speed_Bumps_Integration extends WP_UnitTestCase {
 		parent::setUp();
 	}
 
+	public function test_speed_bump_cache_key() {
+
+		$content = $this->get_dummy_content();
+
+		\Speed_Bumps()->register_speed_bump( 'speed_bump1', array(
+			'string_to_inject' => function() {
+				static $counter = 0;
+				return '[Called ' . ++$counter . ' times]';
+			},
+			'minimum_content_length' => false,
+			'from_start' => false,
+			'from_end' => false,
+		) );
+
+		$this->assertContains( '[Called 1 times]', insert_speed_bumps( $this->get_dummy_content() ) );
+		$this->assertContains( '[Called 1 times]', insert_speed_bumps( $this->get_dummy_content() ) );
+		$this->assertNotContains( '[Called 2 times]', insert_speed_bumps( $this->get_dummy_content() ) );
+
+		$this->assertContains( '[Called 2 times]', insert_speed_bumps( $this->get_dummy_content() . ' with different string' ) );
+		$this->assertNotContains( '[Called 1 times]', insert_speed_bumps( $this->get_dummy_content() . ' with different string' ) );
+		$this->assertNotContains( '[Called 3 times]', insert_speed_bumps( $this->get_dummy_content() . ' with different string' ) );
+
+		Speed_Bumps()->clear_all_speed_bumps();
+	}
+
 	public function test_speed_bump_insertion_based_on_constraint_filter() {
 		register_speed_bump( 'rickroll', array(
 			'string_to_inject' => function() { return '<video>This is the worst video imaginable</video>'; },
