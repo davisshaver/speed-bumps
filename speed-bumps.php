@@ -225,6 +225,7 @@ class Speed_Bumps {
 		add_filter( $filter_id, '\Speed_Bumps\Constraints\Content\Injection::less_than_maximum_number_of_inserts', 10, 4 );
 		add_filter( $filter_id, '\Speed_Bumps\Constraints\Content\Injection::meets_minimum_distance_from_other_inserts', 10, 4 );
 		add_filter( $filter_id, '\Speed_Bumps\Constraints\Elements\Element_Constraints::meets_minimum_distance_from_elements', 10, 4 );
+		add_filter( $filter_id, '\Speed_Bumps\Constraints\Elements\Element_Constraints::not_inside_unclosed_element', 10, 4 );
 	}
 
 	public function get_speed_bumps() {

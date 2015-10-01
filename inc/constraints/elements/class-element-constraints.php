@@ -89,4 +89,38 @@ class Element_Constraints {
 		return $can_insert;
 	}
 
+	/**
+	 * If the element defines a method of ensuring that the current point is
+	 * not inside an unclosed element (like the middle of a blockquote), call
+	 * it, to make sure this is an acceptable insertion point.
+	 *
+	 */
+	public static function not_inside_unclosed_element( $can_insert, $context, $args, $already_inserted ) {
+
+		if ( ! is_array( $args['from_element'] ) ) {
+			return $can_insert;
+		}
+
+		$defaults = array_flip( array( 'paragraphs', 'words', 'characters' ) );
+		$from_element = array_diff_key( $args['from_element'], $defaults );
+
+		if ( ! empty( $from_element ) ) {
+			foreach ( $from_element as $key => $val ) {
+				if ( is_int( $key ) ) {
+					$element_to_check = Factory::build( ucfirst( $val ) );
+				} else {
+					$element_to_check = Factory::build( ucfirst( $key ) );
+				}
+
+				if ( method_exists( $element_to_check, 'not_inside_unclosed_element' ) &&
+						! $element_to_check->not_inside_unclosed_element( Text::content_before( $context ), Text::content_after( $context ) ) ) {
+					$can_insert = false;
+					continue;
+				}
+			}
+		}
+
+		return $can_insert;
+	}
+
 }

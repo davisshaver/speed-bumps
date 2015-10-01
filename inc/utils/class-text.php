@@ -45,6 +45,26 @@ class Text {
 	}
 
 	/**
+	 * Get the content before the current index.
+	 *
+	 * @param array $context Context array
+	 * @return string
+	 */
+	public static function content_before( $context ) {
+		return implode( "\n\n", self::content_between_points( $context['parts'], 0, $context['index'] ) );
+	}
+
+	/**
+	 * Get the content after the current index.
+	 *
+	 * @param array $context Context array
+	 * @return string
+	 */
+	public static function content_after( $context ) {
+		return implode( "\n\n", self::content_between_points( $context['parts'], $context['index'], $context['total_paragraphs'] ) );
+	}
+
+	/**
 	 * Get the content within a certain distance of a given index
 	 *
 	 * Given two indexes, return an array of paragraphs between those two indexes.
