@@ -1,9 +1,14 @@
 {
-  "name": "fusioneng/speed-bumps",
+  "name": "davisshaver/speed-bumps",
+  "type": "wordpress-plugin",
   "authors": [
     {
       "name": "Fusion Engineering",
       "email": "tech@fusion.net"
+    },
+    {
+      "name": "Davis Shaver",
+      "email": "davisshaver@gmail.com"
     }
   ],
   "require-dev": {
